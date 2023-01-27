@@ -1,39 +1,25 @@
 <?php
 /*
   https://api.telegram.org/bot5609730330:AAFtgTbZrGhg7WnX4zD4MzXNKQfni5-aC4g/setWebHook?url=https://doublem.altervista.org/TelegramBot/index.php
-  https://api.telegram.org/bot5609730330:AAFtgTbZrGhg7WnX4zD4MzXNKQfni5-aC4g/setWebHook?url=https://b9dd-151-51-189-114.eu.ngrok.io/php/TelegramBot/
+
+  https://api.telegram.org/bot5609730330:AAFtgTbZrGhg7WnX4zD4MzXNKQfni5-aC4g/setWebHook?url=https://de3c-151-51-189-114.eu.ngrok.io/php/TelegramBot/
   https://api.telegram.org/bot5609730330:AAFtgTbZrGhg7WnX4zD4MzXNKQfni5-aC4g/getWebhookInfo
 */
 
 $botToken = "5609730330:AAFtgTbZrGhg7WnX4zD4MzXNKQfni5-aC4g";
 $website = "https://api.telegram.org/bot".$botToken;
-$importanza;
+$importanza = -1;
+for ($i = 0; $i < 16; $i++) {
+  $importanze[$i] = array();
+}
 //GetUpdate
 $update = file_get_contents('php://input');
 $updateraw = $update;
 
-$importanze = array(
-  [0] => array();
-  [1] => array();
-  [2] => array();
-  [3] => array();
-  [4] => array();
-  [5] => array();
-  [6] => array();
-  [7] => array();
-  [8] => array();
-  [9] => array();
-  [10] => array();
-  [11] => array();
-  [12] => array();
-  [13] => array();
-  [14] => array();
-  [15] => array();
-);
 
 $update = json_decode($update, TRUE);
 
-$chatID = $update["message"]["chat"]["id"];
+$chatID = $update["message"]["from"]["id"];
 $message = $update["message"]["text"];
 $message_id = $update["message"]["message_id"];
 $nome = $update["message"]["chat"]["first_name"];
@@ -48,17 +34,19 @@ fclose($myfile);
 //$message = "ciao.? /mi &^@chiamo michele?!?!?!?!";
 echo "$message <br>";
 
-$frase = rimuoviCaratteriNonAlfanumeri($message);
+$frase = rimuoviCaratteriNonAlfanumeri ($message);
 echo "$frase <br>";
 
 $parole = explode(" ", $frase);
 print_r($parole);
 
-associaImportanzaParole($parole)
+associaImportanzaParole($parole);
 
-InviaMessaggio($chatID, scegliMessaggio());
+$messaggio = scegliMessaggio();
+InviaMessaggio($chatID, $messaggio);
 
 function scegliMessaggio () {
+  global $importanze;
     $paroleDisponibili = $importanze[$importanza];
     $parola = array_rand($paroleDisponibili, 1);
     switch ($parola) {
@@ -68,12 +56,13 @@ function scegliMessaggio () {
       default:
         return "Non capisco quello che stai cercando di dirmi, prova ad esprimerti meglio";
     }
+    //return "null";
 }
 
 function associaImportanzaParole ($parole) {
   foreach ($parole as $parola) {
     if ($parola != " ") {
-      switch ($parole) {
+      switch ($parola) {
           case 'ciao':
             inserisciParole('ciao', 1);
           break;
@@ -84,9 +73,12 @@ function associaImportanzaParole ($parole) {
       }
     }
   }
+
 }
 
 function inserisciParole ($parola, $importanzaParola) {
+  global $importanza;
+  global $importanze;
   if ($importanza < $importanzaParola) {
     $importanza = $importanzaParola;
   }
